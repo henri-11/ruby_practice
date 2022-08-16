@@ -11,11 +11,11 @@ def clean(client)
     email  = row['email'].downcase
     email2 = row['email2'].downcase
     profession = row['profession'].strip
-    client.query("UPDATE people_henri SET lastname = lastname, email = email, email2 = email2, profession = profession")
-
+    client.query("UPDATE people_henri SET lastname = \"#{lastname}\", email = \"#{email}\", email2 = \"#{email2}\", profession = \"#{profession}\";" )
   end
 end
 
+clean(client)
+
 client.close
 
-puts res
