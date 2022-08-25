@@ -6,5 +6,6 @@ client = Mysql2::Client.new(host: "db09.blockshopper.com", username: ENV['DB09_L
 
 get_teacher(2, client)
 get_subject(3, client)
+get_class(1, client)
 
 client.close
