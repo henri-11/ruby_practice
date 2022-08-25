@@ -39,7 +39,7 @@ end
 def get_class(id, client)
 
 f = <<~SQL
-SELECT c.name class, s.name subject, t.first_name
+SELECT c.name class, s.name subject, t.first_name, t.middle_name, t.last_name
 from subjects_henri s 
 join teachers_henri t ON t.subject_id= s.id
      JOIN teachers_classes_henri tc ON tc.teacher_id = t.id
@@ -53,9 +53,31 @@ if results.count.zero?
 else
   res = "Class: #{results[0]['class']}\nSubjects:"
   results.each do |row| 
-    res+="\n#{row['subject']} (#{row['first_name']})"
+    res+="\n#{row['subject']} (#{row['first_name']} #{row['middle_name'][0]}" + "." + " #{row['last_name']})" 
   end
 end
 puts res if res
 end
   
+def get_teachers_list_by_letter(letter, client)
+
+f = <<~SQL
+   SELECT s.name subject, t.first_name, t.middle_name, t.last_name
+from subjects_henri s 
+join teachers_henri t ON t.subject_id= s.id
+      where (t.first_name like "%#{letter}%" or t.last_name like "%#{letter}%") 
+SQL
+
+results = client.query(f).to_a
+
+if results.count.zero?
+  puts  "Match not found!"
+  else
+    res = ""
+  results.each do |row| 
+    res += "#{row['first_name'][0]}. #{row['middle_name'][0]}. #{row['last_name']} (#{row['subject']})\n"
+  end
+ 
+ end
+puts res.strip if res
+end
