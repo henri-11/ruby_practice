@@ -124,3 +124,22 @@ def get_class_info(id, client)
     puts res.strip.chop!
   end
 end
+
+def get_teachers_by_year(year, client)
+
+  t = <<~SQL
+  SELECT first_name, middle_name, last_name FROM teachers_henri WHERE year(birth_date) = #{year}
+  SQL
+
+  results = client.query(t).to_a
+
+  if results.count.zero?
+    puts "Couldn't find any teachers born in that year."
+  else 
+    res = "Teachers born in #{year}:"
+    results.each do |row|
+      res += " #{row['first_name']} #{row['middle_name']} #{row['last_name']},"
+    end
+    puts res.chop! + "."
+  end
+end
