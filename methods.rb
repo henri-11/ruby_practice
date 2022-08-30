@@ -143,3 +143,41 @@ def get_teachers_by_year(year, client)
     puts res.chop! + "."
   end
 end
+
+#Methods for Radom_people assignment:
+
+#Random dates.
+
+def random_date(date_begin, date_end)
+ rand(Date.parse(date_begin)..Date.parse(date_end))
+end
+
+#Random last names.
+
+def random_last_names(n, client)
+  
+  rl = <<~SQL 
+  SELECT last_name FROM last_names;
+  SQL
+
+  @last_names = @last_names ? @last_names : client.query(rl).to_a.map { |el| el['last_name']}
+  result = @last_names.sample(n)
+
+  puts result
+end
+
+def random_first_names(n, client)
+  
+  rf = <<~SQL
+  SELECT FirstName FROM male_names;
+  SQL
+
+  rf2 = <<~SQL
+  SELECT names FROM female_names;
+  SQL
+
+  @names = @names ? @names : (client.query(rf).to_a.map { |el| el['FirstName']} + client.query(rf2).to_a.map { |el| el['names']})
+  result = @names.sample(n)
+
+  puts result 
+end
