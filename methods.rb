@@ -81,3 +81,46 @@ if results.count.zero?
  end
 puts res.strip if res
 end
+
+def set_md5(client)
+
+  f = <<~SQL
+   SELECT id, first_name, middle_name, last_name, birth_date, subject_id
+  from teachers_henri
+  SQL
+
+  src = client.query(f)
+  src.each do |row|
+    x = Digest::MD5.hexdigest "#{row['first_name']}#{row['middle_name']}#{row['last_name']} #{row['birth_date']} #{row['subject_id']}"
+
+    u = <<~SQL
+      UPDATE teachers_henri SET md5 = "#{x}" where id = #{row['id']}
+    SQL
+    client.query(u)
+  end
+end
+
+def get_class_info(id, client)
+
+  c = <<~SQL
+  SELECT c.name class, t.first_name, t.middle_name, t.last_name, c.responisble_teacher_id r_id, t.id
+  from subjects_henri s 
+  join teachers_henri t ON t.subject_id= s.id
+       JOIN teachers_classes_henri tc ON tc.teacher_id = t.id
+       JOIN classes_henri c ON tc.class_id = c.id where c.id =#{id};
+  SQL
+
+   results = client.query(c).to_a
+
+   if results.count.zero?
+    puts "Couldn't find any info about the selected class."
+  else
+    res = "Class name: #{results[0]['class']}\nResponsible teacher:"
+    responsible_teaher = results.find { |el| el['id']==el['r_id'] }
+    res += " #{responsible_teaher['first_name']} #{responsible_teaher['middle_name']} #{responsible_teaher['last_name']}\nInvolved teacher(s): "
+    results.each do |row|
+      res+="#{row['first_name']} #{row['middle_name']} #{row['last_name']}, "
+    end
+    puts res.strip.chop!
+  end
+end
