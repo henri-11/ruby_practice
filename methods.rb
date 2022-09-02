@@ -161,9 +161,11 @@ def random_last_names(n, client)
   SQL
 
   @last_names = @last_names ? @last_names : client.query(rl).to_a.map { |el| el['last_name']}
-  result = @last_names.sample(n)
-
-  puts result
+  result = []
+  n.times do
+    result << @last_names.sample
+  end
+  result
 end
 
 def random_first_names(n, client)
@@ -177,7 +179,32 @@ def random_first_names(n, client)
   SQL
 
   @names = @names ? @names : (client.query(rf).to_a.map { |el| el['FirstName']} + client.query(rf2).to_a.map { |el| el['names']})
-  result = @names.sample(n)
+  result = []
+  n.times do
+    result << @names.sample
+  end
+  result
+end
 
-  puts result 
+#Combinations of first names, last names and birth dates generator, given argument.
+
+def people_gen(n, client)
+  first_names = random_last_names(n, client)
+  last_names  = random_last_names(n, client)
+  birth_dates = []
+  n.times do
+    birth_dates << random_date("1910-01-01","2022-01-01")
+  end
+  people = []
+  first_names.each_with_index do |f_name, i|
+    people << {"f_name"=>f_name,"l_name"=>last_names[i],"birth_date"=>birth_dates[i]}
+  end   
+  people.each_slice(20000) do |people_|
+    insert = "INSERT INTO random_people_henri (firs_tname, last_name, birth_date) VALUES "
+    people_.each do |person|
+      insert += "(\"#{person['f_name']}\",\"#{person['l_name']}\",\"#{person['birth_date']}\"),"
+    end
+    client.query(insert.chop!)
+  end
+  puts "#{people.count} person/people created!"
 end
