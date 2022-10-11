@@ -1,4 +1,3 @@
-
 def new_clean_table(client) 
 
 	begin
